@@ -1,1 +1,1 @@
-pursuit-delay-game-solver
+pursuit-game-solver
