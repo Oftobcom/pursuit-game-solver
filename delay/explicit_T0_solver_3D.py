@@ -96,18 +96,16 @@ def J_i(T: float, a: float, b: float, h: float) -> float:
             term1 = math.exp(a * arg1) / a * Qk(arg1, a, k)
             term2 = math.exp(a * arg2) / a * Qk(arg2, a, k)
             total += (b ** k) * (term1 - term2)
-        for k in range(n_full + 1, n_total + 1):
-            arg = T - k * h
-            term = (math.exp(a * arg) / a) * Qk(arg, a, k) - ((-1) ** k) / (a ** (k + 1))
-            total += (b ** k) * term
+        arg = T - n_total * h
+        term = (math.exp(a * arg) / a) * Qk(arg, a, n_total) - ((-1) ** n_total) / (a ** (n_total + 1))
+        total += (b ** n_total) * term
     else:  # a == 0
         for k in range(0, n_full + 1):
             delta1 = T - k * h
             delta2 = T - h - k * h
             total += (b ** k) * ((delta1 ** (k + 1) - delta2 ** (k + 1)) / math.factorial(k + 1))
-        for k in range(n_full + 1, n_total + 1):
-            delta = T - k * h
-            total += (b ** k) * (delta ** (k + 1) / math.factorial(k + 1))
+        delta = T - n_total * h
+        total += (b ** n_total) * (delta ** (n_total + 1) / math.factorial(n_total + 1))
     return total
 
 # ------------------------------------------------------------
@@ -153,7 +151,7 @@ def compute_Delta_vector(T: float, params: dict) -> List[float]:
     term3_vec = scalar_mul(b1 * J1, z01)
     term4_vec = scalar_mul(b2 * J2, z02)
 
-    Delta_vec = vec_sub(vec_sub(term1_vec, term2_vec), vec_sub(term3_vec, term4_vec))
+    Delta_vec = vec_add(vec_sub(term1_vec, term2_vec), vec_sub(term3_vec, term4_vec))
     return Delta_vec
 
 def compute_Delta_norm(T: float, params: dict) -> float:

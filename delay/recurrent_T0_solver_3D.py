@@ -100,17 +100,18 @@ def J_i_recurrent(T: float, a: float, b: float, h: float) -> float:
     n_full = int((T - h) // h) if T - h >= 0 else -1
     n_total = int(T // h)
     total = 0.0
+    b_pow = 1.0
     for k in range(n_full + 1):
         U1 = T - k * h
         U2 = T - h - k * h
         if U2 < 0:
             U2 = 0.0
-        total += (b ** k) * (J0_recurrent(U1, k, a) - J0_recurrent(U2, k, a))
-    for k in range(n_full + 1, n_total + 1):
-        U = T - k * h
-        if U < 0:
-            U = 0.0
-        total += (b ** k) * J0_recurrent(U, k, a)
+        total += b_pow * (J0_recurrent(U1, k, a) - J0_recurrent(U2, k, a))
+        b_pow *= b
+    U = T - n_total * h
+    if U < 0:
+        U = 0.0
+    total += b ** n_total * J0_recurrent(U, n_total, a)
     return total
 
 # ------------------------------------------------------------
@@ -167,7 +168,7 @@ def compute_Delta_vector(T: float, params: dict) -> List[float]:
     term1_vec = scalar_mul(b1 * J1, z01)
     term2_vec = scalar_mul(b2 * J2, z02)
 
-    Delta_vec = vec_sub(vec_sub(S1_vec, S2_vec), vec_sub(term1_vec, term2_vec))
+    Delta_vec = vec_add(vec_sub(S1_vec, S2_vec), vec_sub(term1_vec, term2_vec))
     return Delta_vec
 
 def compute_Delta_norm(T: float, params: dict) -> float:

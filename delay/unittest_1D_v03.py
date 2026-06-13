@@ -11,8 +11,8 @@ import math
 # Импортируем функции из обоих модулей
 # Предполагается, что файлы находятся в той же директории
 try:
-    from recurrent_T0_solver import find_T0_recurrent, compute_Delta_recurrent, compute_R_recurrent
-    from explicit_T0_solver import find_T0, compute_Delta, compute_R
+    from recurrent_T0_solver_1D import find_T0_recurrent, compute_Delta_recurrent, compute_R_recurrent
+    from explicit_T0_solver_1D import find_T0, compute_Delta, compute_R
 except ImportError as e:
     print("Ошибка импорта: убедитесь, что файлы recurrent_T0_solver.py и explicit_T0_solver.py находятся в текущей директории.")
     sys.exit(1)
@@ -29,6 +29,18 @@ PARAMS = {
     'z01': 5.0,
     'z02': 100.0
 }
+
+# PARAMS = {
+#     'a1': 0.10,
+#     'b1': 0.40,
+#     'a2': 0.05,
+#     'b2': 0.20,
+#     'h': 0.3,
+#     'alpha': 15.0,
+#     'beta': 8.0,
+#     'z01': 5.0,
+#     'z02': 100.0
+# }
 
 EPS = 1e-6          # точность для бисекции
 NMAX = 50           # максимальное число шагов (чтобы избежать переполнения при k>170)

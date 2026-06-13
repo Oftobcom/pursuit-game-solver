@@ -96,20 +96,20 @@ def J_i_recurrent(T: float, a: float, b: float, h: float) -> float:
     n_full = int((T - h) // h) if T - h >= 0 else -1
     n_total = int(T // h)
     total = 0.0
+    b_pow = 1.0
     # Первая сумма: k = 0 .. floor((T-h)/h)
     for k in range(n_full + 1):
         U1 = T - k * h
         U2 = T - h - k * h
         if U2 < 0:
             U2 = 0.0
-        term = b ** k * (J0_recurrent(U1, k, a) - J0_recurrent(U2, k, a))
-        total += term
-    # Вторая сумма: k = floor((T-h)/h)+1 .. floor(T/h)
-    for k in range(n_full + 1, n_total + 1):
-        U = T - k * h
-        if U < 0:
-            U = 0.0
-        total += b ** k * J0_recurrent(U, k, a)
+        total += b_pow * (J0_recurrent(U1, k, a) - J0_recurrent(U2, k, a))
+        b_pow *= b
+    # Второе слагаемое
+    U = T - n_total * h
+    if U < 0:
+        U = 0.0
+    total += b ** n_total * J0_recurrent(U, n_total, a)
     return total
 
 
@@ -121,6 +121,8 @@ def S_i_recurrent(T: float, a: float, b: float, h: float, z0: float) -> float:
     Вычисляет S_i(T) = Σ_{k=0}^{⌊T/h⌋} b^k * (T - k*h)^k / k! * exp(a*(T - k*h)) * z0
     используя рекуррентное соотношение (5.8).
     """
+    if z0 == 0.0:
+        return 0.0
     if h <= 0:
         raise ValueError("h > 0")
     if T < 0:
@@ -275,13 +277,23 @@ def find_T0_recurrent(params: dict, eps: float = 1e-6, nmax: int = 1000) -> Opti
 # ------------------------------------------------------------
 if __name__ == "__main__":
     # Параметры из раздела "Примеры вычисления"
+    # parameters = {
+    #     'a1': 0.0015, 'b1': 0.005,
+    #     'a2': 0.0008, 'b2': 0.002,
+    #     'h': 24.0,
+    #     'alpha': 0.22, 'beta': 0.08,
+    #     'z01': 5.0, 'z02': 100.0
+    # }
+
     parameters = {
-        'a1': 0.15, 'b1': 0.5,
-        'a2': 0.08, 'b2': 0.2,
-        'h': 24.0,
-        'alpha': 0.22, 'beta': 0.08,
-        'z01': 5.0, 'z02': 100.0
+        'a1': 0.1, 'b1': 0.6,
+        'a2': 0.05, 'b2': 0.4,
+        'h': 0.2,
+        'alpha': 10, 'beta': 7,
+        'z01': 0, 'z02': 100.0
     }
+
+
     T0 = find_T0_recurrent(parameters, eps=1e-3, nmax=500)
     if T0 is not None:
         print(f"Оптимальное время преследования (рекуррентный метод): T0 = {T0:.6f}")

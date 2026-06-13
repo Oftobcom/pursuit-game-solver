@@ -5,6 +5,8 @@
 требуется задавать нормы и скалярное произведение.
 """
 
+import matplotlib.pyplot as plt
+import numpy as np
 import math
 from typing import Callable, Tuple, Optional
 
@@ -87,19 +89,18 @@ def J_i(T: float, a: float, b: float, h: float) -> float:
             term1 = math.exp(a * arg1) / a * Qk(arg1, a, k)
             term2 = math.exp(a * arg2) / a * Qk(arg2, a, k)
             total += (b ** k) * (term1 - term2)
-        # вторая сумма: k = floor((T-h)/h)+1 … floor(T/h)
-        for k in range(n_full + 1, n_total + 1):
-            arg = T - k * h
-            term = (math.exp(a * arg) / a) * Qk(arg, a, k) - ((-1) ** k) / (a ** (k + 1))
-            total += (b ** k) * term
+        # второе слагаемое
+        arg = T - n_total * h
+        term = (math.exp(a * arg) / a) * Qk(arg, a, n_total) - ((-1) ** n_total) / (a ** (n_total + 1))
+        total += (b ** n_total) * term
     else:  # a == 0
         for k in range(0, n_full + 1):
             delta1 = T - k * h
             delta2 = T - h - k * h
             total += (b ** k) * ((delta1 ** (k + 1) - delta2 ** (k + 1)) / math.factorial(k + 1))
-        for k in range(n_full + 1, n_total + 1):
-            delta = T - k * h
-            total += (b ** k) * (delta ** (k + 1) / math.factorial(k + 1))
+
+        delta = T - n_total * h
+        total += (b ** n_total) * (delta ** (n_total + 1) / math.factorial(n_total + 1))
     return total
 
 
@@ -237,6 +238,47 @@ def find_T0(params: dict, eps: float = 1e-6, Nmax: int = 1000) -> Optional[float
             a = c
     return (a + b) / 2.0
 
+def plot_Delta_R(params, T_max=None, n_points=500, T0=None, save_path=None):
+    """
+    Строит графики |Δ(T)| и R(T) в зависимости от T.
+    
+    Параметры:
+        params: словарь с параметрами модели
+        T_max: максимальное время (если None, то T_max = Nmax*h из params или 100)
+        n_points: количество точек для дискретизации
+        T0: опциональное найденное время (будет отмечено вертикальной линией)
+        save_path: путь для сохранения графика (если None, показывается интерактивно)
+    """
+    h = params['h']
+    if T_max is None:
+        # Используем Nmax из внешнего контекста? По умолчанию возьмём 500*h
+        Nmax = params.get('Nmax', 500)
+        T_max = Nmax * h
+    T_vals = np.linspace(0, T_max, n_points)
+    Delta_abs = np.zeros_like(T_vals)
+    R_vals = np.zeros_like(T_vals)
+    
+    for i, T in enumerate(T_vals):
+        # Используем существующие функции compute_Delta и compute_R
+        Delta_abs[i] = abs(compute_Delta(T, params))
+        R_vals[i] = compute_R(T, params)
+    
+    plt.figure(figsize=(10, 6))
+    plt.plot(T_vals, Delta_abs, label=r'$|\Delta(T)|$', linewidth=2)
+    plt.plot(T_vals, R_vals, label=r'$R(T)$', linewidth=2)
+    if T0 is not None and 0 <= T0 <= T_max:
+        plt.axvline(x=T0, color='red', linestyle='--', label=f'$T_0 = {T0:.4f}$')
+    plt.xlabel('Время T')
+    plt.ylabel('Значение')
+    # plt.title('Зависимость $|\Delta(T)|$ и $R(T)$')
+    plt.title(r'Зависимость $|\Delta(T)|$ и $R(T)$')   # raw-строка
+    plt.legend()
+    plt.grid(True)
+    if save_path:
+        plt.savefig(save_path, dpi=150)
+        print(f"График сохранён в {save_path}")
+    else:
+        plt.show()
 
 # ------------------------------------------------------------
 # Пример использования (параметры из статьи)
@@ -244,14 +286,17 @@ def find_T0(params: dict, eps: float = 1e-6, Nmax: int = 1000) -> Optional[float
 if __name__ == "__main__":
     # Параметры из раздела "Примеры вычисления"
     pars = {
-        'a1': 0.15, 'b1': 0.5,
-        'a2': 0.08, 'b2': 0.2,
+        'a1': 0.0015, 'b1': 0.005,
+        'a2': 0.0008, 'b2': 0.002,
         'h': 24.0,
         'alpha': 0.22, 'beta': 0.08,
         'z01': 5.0, 'z02': 100.0
     }
+    
     T0 = find_T0(pars, eps=1e-3, Nmax=500)
     if T0 is not None:
         print(f"Оптимальное время преследования T0 = {T0:.6f}")
+        # Построить график
+        # plot_Delta_R(pars, T_max=None, n_points=1000, T0=T0, save_path='Delta_R_plot.png')
     else:
         print("Задача неразрешима за разумное время.")
