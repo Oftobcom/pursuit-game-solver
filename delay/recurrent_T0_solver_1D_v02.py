@@ -11,7 +11,10 @@
 """
 
 import math
+import numpy as np
 from typing import Tuple, Optional
+import matplotlib.pyplot as plt
+import sys
 
 # ------------------------------------------------------------
 # Рекуррентное вычисление φ_i(t) (лемма 5.1)
@@ -236,15 +239,16 @@ def find_T0_recurrent(params: dict, eps: float = 1e-6, nmax: int = 1000) -> Opti
     Реализует алгоритм \ref{alg:recurrent_T0} поиска минимального времени T0.
     Возвращает T0 или None (если неразрешимо).
     """
+    print("parameters:", params)
     # Тривиальный случай
     delta0 = params['z01'] - params['z02']
     if abs(delta0) <= eps:
         return 0.0
 
     # Проверка условия 1 на [0, nmax*h]
-    if not check_condition1_recurrent(params, nmax * params['h']):
-        print("Решение не найдено: поточечное условие не выполнено")
-        return None
+    # if not check_condition1_recurrent(params, nmax * params['h']):
+    #     print("Решение не найдено: поточечное условие не выполнено")
+    #     return None
 
     n = 1
     while n <= nmax:
@@ -276,26 +280,122 @@ def find_T0_recurrent(params: dict, eps: float = 1e-6, nmax: int = 1000) -> Opti
 # Пример использования (параметры из статьи)
 # ------------------------------------------------------------
 if __name__ == "__main__":
-    # Параметры из раздела "Примеры вычисления"
-    # parameters = {
-    #     'a1': 0.0015, 'b1': 0.005,
-    #     'a2': 0.0008, 'b2': 0.002,
-    #     'h': 24.0,
-    #     'alpha': 0.22, 'beta': 0.08,
-    #     'z01': 5.0, 'z02': 100.0
-    # }
 
+    #########
+    # Параметры, показывающие практические линейную зависимость T0 от h.
+    # начало
     parameters = {
-        'a1': 0.1, 'b1': 0.6,
-        'a2': 0.05, 'b2': 0.4,
-        'h': 0.2,
-        'alpha': 10, 'beta': 7,
-        'z01': 0, 'z02': 100.0
+        'a1': 0.0015,
+        'b1': 0.005,
+        'a2': 0.0008,
+        'b2': 0.002,
+        'h': 20.0,
+        'alpha': 0.22,
+        'beta': 0.08,
+        'z01': 5.0,
+        'z02': 100.0
     }
 
+    h_min = 20
+    h_max = 60
+    h = h_min
+    step = 2
+    # конец
+    #########
 
-    T0 = find_T0_recurrent(parameters, eps=1e-3, nmax=500)
-    if T0 is not None:
-        print(f"Оптимальное время преследования (рекуррентный метод): T0 = {T0:.6f}")
-    else:
-        print("Задача неразрешима за разумное время.")
+    # #########
+    # # Параметры, показывающие нелинейную зависимость T0 от h.
+    # # начало
+    # parameters = {
+    #     'a1': 0.5,
+    #     'b1': 0.2,
+    #     'a2': 0.4,
+    #     'b2': 0.15,
+    #     'h': 0.5,
+    #     'alpha': 20,
+    #     'beta': 8,
+    #     'z01': 0.0,
+    #     'z02': 100.0
+    # }
+
+    # h_min = 0.5
+    # h_max = 5
+    # h = h_min
+    # step = 0.5
+    # # конец
+    # #########
+
+    results = {
+        'h': [],
+        'T0': [],
+        'success': []
+    }
+
+    while h <= h_max:
+        parameters['h'] = h  # можно менять для тестирования разных h
+        T0 = find_T0_recurrent(parameters, eps=1e-6, nmax=500)
+        if T0 is not None:
+            print(f"Оптимальное время преследования (рекуррентный метод): T0 = {T0:.6f}")
+            results['h'].append(h)
+            results['T0'].append(T0)
+            results['success'].append(True)
+        else:
+            print("Задача неразрешима за разумное время.")
+        h += step
+
+    # ----------------------------------------------------------------------
+    # Построение графика
+    # ----------------------------------------------------------------------
+    plt.figure(figsize=(10, 6))
+
+    h_arr = np.array(results['h'])
+    mask_success = np.array(results['success'])
+
+    # Точки, где решение найдено
+    if np.any(mask_success):
+        h_success = h_arr[mask_success]
+        T_success = np.array([results['T0'][i] for i in range(len(h_arr)) if mask_success[i]])
+        plt.plot(h_success, T_success, 'o-', label='Рекуррентный метод', color='red', linewidth=2, markersize=8)
+
+        # Подписи значений у точек
+        # for hi, ti in zip(h_success, T_success):
+        #     plt.annotate(f'{ti:.3f}', (hi, ti), textcoords="offset points", xytext=(0,10), ha='center', fontsize=9)
+
+    # Точки, где решение не найдено – закрашиваем область
+    mask_fail = ~mask_success
+    if np.any(mask_fail):
+        for hf in h_arr[mask_fail]:
+            plt.axvspan(hf - step/2, hf + step/2, alpha=0.2, color='gray')
+        # Подпись в первом таком интервале
+        first_fail = h_arr[mask_fail][0]
+        ylim = plt.ylim()
+        plt.text(first_fail, ylim[1]*0.9, 'Неразрешимость\n(условие 1)', ha='center', color='black', fontsize=10,
+                bbox=dict(boxstyle='round', facecolor='white', alpha=0.7))
+
+    plt.xlabel('Запаздывание $h$', fontsize=14)
+    plt.ylabel('Минимальное время преследования $T_0$', fontsize=14)
+    plt.title('Зависимость $T_0(h)$ (рекуррентный алгоритм)', fontsize=16)
+    plt.grid(True, linestyle='--', alpha=0.6)
+    plt.legend(fontsize=12)
+
+    # Информация о параметрах
+    params_text = (f"$a_1={parameters['a1']}, b_1={parameters['b1']}, "
+                f"a_2={parameters['a2']}, b_2={parameters['b2']}, "
+                f"\\alpha={parameters['alpha']}, \\beta={parameters['beta']}, "
+                f"z_{{01}}={parameters['z01']}, z_{{02}}={parameters['z02']}$")
+    plt.figtext(0.5, 0.01, params_text, ha='center', fontsize=10, bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.5))
+
+    plt.tight_layout(rect=[0, 0.05, 1, 1])
+    plt.savefig('T0_vs_h_recurrent_v02.png', dpi=150)
+    plt.show()
+
+    # ----------------------------------------------------------------------
+    # Вывод таблицы результатов
+    # ----------------------------------------------------------------------
+    # print("\nТаблица результатов (рекуррентный метод):")
+    # print(" h       T0")
+    # print("--------------")
+    # for i, h in enumerate(results['h']):
+    #     T0 = results['T0'][i]
+    #     status = f"{T0:.6f}" if T0 is not None else "None"
+    #     print(f"{h:5.2f}   {status}")        

@@ -11,39 +11,51 @@ import math
 # Импортируем функции из обоих модулей
 # Предполагается, что файлы находятся в той же директории
 try:
-    from recurrent_T0_solver_1D import find_T0_recurrent, compute_Delta_recurrent, compute_R_recurrent
-    from explicit_T0_solver_1D import find_T0, compute_Delta, compute_R
+    from recurrent_T0_solver_1D_v01 import find_T0_recurrent, compute_Delta_recurrent, compute_R_recurrent
+    from explicit_T0_solver_1D_v01 import find_T0, compute_Delta, compute_R
 except ImportError as e:
     print("Ошибка импорта: убедитесь, что файлы recurrent_T0_solver.py и explicit_T0_solver.py находятся в текущей директории.")
     sys.exit(1)
 
 # Параметры из условия
-PARAMS = {
-    'a1': 0.0015,
-    'b1': 0.005,
-    'a2': 0.0008,
-    'b2': 0.002,
-    'h': 24.0,
-    'alpha': 0.22,
-    'beta': 0.08,
-    'z01': 5.0,
-    'z02': 100.0
-}
+# PARAMS = {
+#     'a1': 0.1,
+#     'b1': 0.6,
+#     'a2': 0.05,
+#     'b2': 0.4,
+#     'h': 0.8,
+#     'alpha': 14,
+#     'beta': 7,
+#     'z01': 0.0,
+#     'z02': 100.0
+# }
 
 # PARAMS = {
-#     'a1': 0.10,
-#     'b1': 0.40,
-#     'a2': 0.05,
-#     'b2': 0.20,
-#     'h': 0.3,
-#     'alpha': 15.0,
-#     'beta': 8.0,
+#     'a1': 0.0015,
+#     'b1': 0.005,
+#     'a2': 0.0008,
+#     'b2': 0.002,
+#     'h': 24.0,
+#     'alpha': 0.22,
+#     'beta': 0.08,
 #     'z01': 5.0,
 #     'z02': 100.0
 # }
 
+PARAMS = {
+    'a1': 0.10,
+    'b1': 0.40,
+    'a2': 0.05,
+    'b2': 0.20,
+    'h': 5,
+    'alpha': 15.0,
+    'beta': 8.0,
+    'z01': 5.0,
+    'z02': 100.0
+}
+
 EPS = 1e-6          # точность для бисекции
-NMAX = 50           # максимальное число шагов (чтобы избежать переполнения при k>170)
+NMAX = 500           # максимальное число шагов (чтобы избежать переполнения при k>170)
 
 def compare_T0():
     """Сравнение результатов find_T0_recurrent и find_T0."""

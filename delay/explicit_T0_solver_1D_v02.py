@@ -195,7 +195,7 @@ def check_condition1(params: dict, T: float) -> bool:
     return True
 
 
-def find_T0(params: dict, eps: float = 1e-6, Nmax: int = 1000) -> Optional[float]:
+def find_T0(params: dict, eps: float = 1e-6, nmax: int = 1000) -> Optional[float]:
     """
     Основной алгоритм поиска минимального времени T0 по явным формулам.
     Параметры передаются словарём:
@@ -207,14 +207,14 @@ def find_T0(params: dict, eps: float = 1e-6, Nmax: int = 1000) -> Optional[float
     if abs(delta0) <= eps:
         return 0.0
 
-    # Проверка условия 1 на [0, Nmax*h]
-    if not check_condition1(params, Nmax * params['h']):
+    # Проверка условия 1 на [0, nmax*h]
+    if not check_condition1(params, nmax * params['h']):
         print("Решение не найдено: поточечное условие не выполнено")
         return None
 
     # Поиск интервала [a, b] перебором T = n*h
     n = 1
-    while n <= Nmax:
+    while n <= nmax:
         T = n * params['h']
         Delta_val = compute_Delta(T, params)
         R_val = compute_R(T, params)
@@ -224,7 +224,7 @@ def find_T0(params: dict, eps: float = 1e-6, Nmax: int = 1000) -> Optional[float
             break
         n += 1
     else:
-        print(f"Неразрешимо: достигнут T_max = {Nmax * params['h']}")
+        print(f"Неразрешимо: достигнут T_max = {nmax * params['h']}")
         return None
 
     # Уточнение бисекцией
@@ -244,16 +244,16 @@ def plot_Delta_R(params, T_max=None, n_points=500, T0=None, save_path=None):
     
     Параметры:
         params: словарь с параметрами модели
-        T_max: максимальное время (если None, то T_max = Nmax*h из params или 100)
+        T_max: максимальное время (если None, то T_max = nmax*h из params или 100)
         n_points: количество точек для дискретизации
         T0: опциональное найденное время (будет отмечено вертикальной линией)
         save_path: путь для сохранения графика (если None, показывается интерактивно)
     """
     h = params['h']
     if T_max is None:
-        # Используем Nmax из внешнего контекста? По умолчанию возьмём 500*h
-        Nmax = params.get('Nmax', 500)
-        T_max = Nmax * h
+        # Используем nmax из внешнего контекста? По умолчанию возьмём 500*h
+        nmax = params.get('nmax', 500)
+        T_max = nmax * h
     T_vals = np.linspace(0, T_max, n_points)
     Delta_abs = np.zeros_like(T_vals)
     R_vals = np.zeros_like(T_vals)
@@ -285,18 +285,111 @@ def plot_Delta_R(params, T_max=None, n_points=500, T0=None, save_path=None):
 # ------------------------------------------------------------
 if __name__ == "__main__":
     # Параметры из раздела "Примеры вычисления"
-    pars = {
-        'a1': 0.0015, 'b1': 0.005,
-        'a2': 0.0008, 'b2': 0.002,
+    # parameters = {
+    #     'a1': 0.0015, 'b1': 0.005,
+    #     'a2': 0.0008, 'b2': 0.002,
+    #     'h': 24.0,
+    #     'alpha': 0.22, 'beta': 0.08,
+    #     'z01': 5.0, 'z02': 100.0
+    # }
+
+    # parameters = {
+    #     'a1': 0.10,
+    #     'b1': 0.40,
+    #     'a2': 0.05,
+    #     'b2': 0.20,
+    #     'h': 5,
+    #     'alpha': 15.0,
+    #     'beta': 8.0,
+    #     'z01': 5.0,
+    #     'z02': 100.0
+    # }
+
+    parameters = {
+        'a1': 0.0015,
+        'b1': 0.005,
+        'a2': 0.0008,
+        'b2': 0.002,
         'h': 24.0,
-        'alpha': 0.22, 'beta': 0.08,
-        'z01': 5.0, 'z02': 100.0
+        'alpha': 0.22,
+        'beta': 0.08,
+        'z01': 5.0,
+        'z02': 100.0
     }
-    
-    T0 = find_T0(pars, eps=1e-3, Nmax=500)
-    if T0 is not None:
-        print(f"Оптимальное время преследования T0 = {T0:.6f}")
-        # Построить график
-        # plot_Delta_R(pars, T_max=None, n_points=1000, T0=T0, save_path='Delta_R_plot.png')
-    else:
-        print("Задача неразрешима за разумное время.")
+
+    results = {
+        'h': [],
+        'T0': [],
+        'success': []
+    }
+
+    h = 20
+    step = 2
+    for i in range(1, 22):
+        parameters['h'] = h  # можно менять для тестирования разных h
+        T0 = find_T0(parameters, eps=1e-6, nmax=500)
+        if T0 is not None:
+            print(f"Оптимальное время преследования (явный метод): T0 = {T0:.6f}")
+            results['h'].append(h)
+            results['T0'].append(T0)
+            results['success'].append(True)
+        else:
+            print("Задача неразрешима за разумное время.")
+        h += step
+
+    # ----------------------------------------------------------------------
+    # Построение графика
+    # ----------------------------------------------------------------------
+    plt.figure(figsize=(10, 6))
+
+    h_arr = np.array(results['h'])
+    mask_success = np.array(results['success'])
+
+    # Точки, где решение найдено
+    if np.any(mask_success):
+        h_success = h_arr[mask_success]
+        T_success = np.array([results['T0'][i] for i in range(len(h_arr)) if mask_success[i]])
+        plt.plot(h_success, T_success, 'o-', label='Рекуррентный метод', color='red', linewidth=2, markersize=8)
+
+        # Подписи значений у точек
+        for hi, ti in zip(h_success, T_success):
+            plt.annotate(f'{ti:.3f}', (hi, ti), textcoords="offset points", xytext=(0,10), ha='center', fontsize=9)
+
+    # Точки, где решение не найдено – закрашиваем область
+    mask_fail = ~mask_success
+    if np.any(mask_fail):
+        for hf in h_arr[mask_fail]:
+            plt.axvspan(hf - step/2, hf + step/2, alpha=0.2, color='gray')
+        # Подпись в первом таком интервале
+        first_fail = h_arr[mask_fail][0]
+        ylim = plt.ylim()
+        plt.text(first_fail, ylim[1]*0.9, 'Неразрешимость\n(условие 1)', ha='center', color='black', fontsize=10,
+                bbox=dict(boxstyle='round', facecolor='white', alpha=0.7))
+
+    plt.xlabel('Запаздывание $h$', fontsize=14)
+    plt.ylabel('Минимальное время преследования $T_0$', fontsize=14)
+    plt.title('Зависимость $T_0(h)$ (рекуррентный алгоритм, v02)', fontsize=16)
+    plt.grid(True, linestyle='--', alpha=0.6)
+    plt.legend(fontsize=12)
+
+    # Информация о параметрах
+    params_text = (f"$a_1={parameters['a1']}, b_1={parameters['b1']}, "
+                f"a_2={parameters['a2']}, b_2={parameters['b2']}, "
+                f"\\alpha={parameters['alpha']}, \\beta={parameters['beta']}, "
+                f"z_{{01}}={parameters['z01']}, z_{{02}}={parameters['z02']}$")
+    plt.figtext(0.5, 0.01, params_text, ha='center', fontsize=10, bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.5))
+
+    plt.tight_layout(rect=[0, 0.05, 1, 1])
+    plt.savefig('T0_vs_h_recurrent_v02.png', dpi=150)
+    plt.show()
+
+    # ----------------------------------------------------------------------
+    # Вывод таблицы результатов
+    # ----------------------------------------------------------------------
+    print("\nТаблица результатов (рекуррентный метод, v02):")
+    print(" h       T0")
+    print("--------------")
+    for i, h in enumerate(results['h']):
+        T0 = results['T0'][i]
+        status = f"{T0:.6f}" if T0 is not None else "None"
+        print(f"{h:5.2f}   {status}")        

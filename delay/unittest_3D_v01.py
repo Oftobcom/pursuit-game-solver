@@ -17,31 +17,31 @@ except ImportError as e:
     sys.exit(1)
 
 # Параметры трёхмерного численного эксперимента (из таблицы)
-PARAMS_3D = {
-    'a1': 0.10,
-    'b1': 0.40,
-    'a2': 0.05,
-    'b2': 0.20,
-    'h': 0.3,
-    'alpha': 15.0,
-    'beta': 8.0,
-    'z01': [0.0, 0.0, 0.0],
-    'z02': [100.0, 80.0, 60.0]
-}
-
-# PARAMS_3D = {
-#     'a1': 0.0015,
-#     'b1': 0.005,
-#     'a2': 0.0008,
-#     'b2': 0.002,
-#     'h': 24.0,
-#     'alpha': 0.22,
-#     'beta': 0.08,
-#     'z01': [5.0, 0.0, 0.0],
-#     'z02': [100.0, 0.0, 0.0]
+# parameters_3d = {
+#     'a1': 0.10,
+#     'b1': 0.40,
+#     'a2': 0.05,
+#     'b2': 0.20,
+#     'h': 0.4,
+#     'alpha': 15.0,
+#     'beta': 8.0,
+#     'z01': [0.0, 0.0, 0.0],
+#     'z02': [100.0, 80.0, 60.0]
 # }
 
-# PARAMS_3D = {
+parameters_3d = {
+    'a1': 0.0015,
+    'b1': 0.005,
+    'a2': 0.0008,
+    'b2': 0.002,
+    'h': 24.0,
+    'alpha': 0.22,
+    'beta': 0.08,
+    'z01': [5.0, 0.0, 0.0],
+    'z02': [100.0, 0.0, 0.0]
+}
+
+# parameters_3d = {
 #     'a1': 0.10,
 #     'b1': 0.40,
 #     'a2': 0.05,
@@ -59,8 +59,8 @@ NMAX = 500          # максимальное число шагов (T_max = NM
 def compare_T0():
     """Сравнение результатов find_T0_recurrent_3d и find_T0_explicit."""
     print("=== Сравнение T0 ===")
-    T0_rec = find_T0_recurrent_3d(PARAMS_3D, eps=EPS, nmax=NMAX)
-    T0_exp = find_T0_explicit(PARAMS_3D, eps=EPS, Nmax=NMAX)
+    T0_rec = find_T0_recurrent_3d(parameters_3d, eps=EPS, nmax=NMAX)
+    T0_exp = find_T0_explicit(parameters_3d, eps=EPS, Nmax=NMAX)
 
     if T0_rec is None:
         print("Рекуррентный метод: решение не найдено (None)")
@@ -93,16 +93,16 @@ def compare_Delta_R(T_values):
     print("-" * 40)
     for T in T_values:
         try:
-            Delta_norm_rec = rec_Delta_norm(T, PARAMS_3D)
-            R_rec = rec_R(T, PARAMS_3D)
+            Delta_norm_rec = rec_Delta_norm(T, parameters_3d)
+            R_rec = rec_R(T, parameters_3d)
         except Exception as e:
             Delta_norm_rec = R_rec = None
             print(f"T={T:6.2f}: рекуррентная ошибка – {e}")
             continue
 
         try:
-            Delta_norm_exp = exp_Delta_norm(T, PARAMS_3D)
-            R_exp = exp_R(T, PARAMS_3D)
+            Delta_norm_exp = exp_Delta_norm(T, parameters_3d)
+            R_exp = exp_R(T, parameters_3d)
         except Exception as e:
             Delta_norm_exp = R_exp = None
             print(f"T={T:6.2f}: явная ошибка – {e}")
@@ -118,18 +118,18 @@ def compare_Delta_R(T_values):
 def main():
     print("Сравнение рекуррентного и явного методов для трёхмерного случая")
     print("Параметры эксперимента:")
-    print(f"  h = {PARAMS_3D['h']} с")
-    print(f"  a1 = {PARAMS_3D['a1']}, b1 = {PARAMS_3D['b1']}")
-    print(f"  a2 = {PARAMS_3D['a2']}, b2 = {PARAMS_3D['b2']}")
-    print(f"  α = {PARAMS_3D['alpha']} м/с, β = {PARAMS_3D['beta']} м/с")
-    print(f"  z01 = {PARAMS_3D['z01']} м")
-    print(f"  z02 = {PARAMS_3D['z02']} м")
-    print(f"Точность EPS = {EPS}, NMAX = {NMAX} (T_max = {NMAX * PARAMS_3D['h']} с)\n")
+    print(f"  h = {parameters_3d['h']} с")
+    print(f"  a1 = {parameters_3d['a1']}, b1 = {parameters_3d['b1']}")
+    print(f"  a2 = {parameters_3d['a2']}, b2 = {parameters_3d['b2']}")
+    print(f"  α = {parameters_3d['alpha']} м/с, β = {parameters_3d['beta']} м/с")
+    print(f"  z01 = {parameters_3d['z01']} м")
+    print(f"  z02 = {parameters_3d['z02']} м")
+    print(f"Точность EPS = {EPS}, NMAX = {NMAX} (T_max = {NMAX * parameters_3d['h']} с)\n")
 
     compare_T0()
 
     # Тестовые точки T – кратные h (первые 10 шагов)
-    test_T = [PARAMS_3D['h'] * i for i in range(1, min(NMAX, 10) + 1)]
+    test_T = [parameters_3d['h'] * i for i in range(1, min(NMAX, 10) + 1)]
     compare_Delta_R(test_T)
 
 if __name__ == "__main__":
