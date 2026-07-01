@@ -35,22 +35,40 @@ except ImportError:
 #    'z02': 100.0
 #}
 
+#nonlinear
+#FIXED_PARAMS = {
+#    'a1': 0.5,
+#    'b1': 0.2,
+#    'a2': 0.4,
+#    'b2': 0.15,
+#    'alpha': 20.0,
+#    'beta': 8.0,
+#    'z01': 0.0,
+#    'z02': 100.0
+#}
+#
+## Диапазон изменения h
+#h_min = 0.5
+#h_max = 5.0
+#step = 0.5
+
+#linear
 FIXED_PARAMS = {
-    'a1': 0.5,
-    'b1': 0.2,
-    'a2': 0.4,
-    'b2': 0.15,
-    'alpha': 20.0,
-    'beta': 8.0,
-    'z01': 0.0,
+    'a1': 0.0015,
+    'b1': 0.005,
+    'a2': 0.0008,
+    'b2': 0.002,
+    'alpha': 0.22,
+    'beta': 0.08,
+    'z01': 5.0,
     'z02': 100.0
 }
 
-
 # Диапазон изменения h
-h_min = 0.5
-h_max = 5.0
-step = 0.5
+h_min = 20
+h_max = 60
+step = 2
+
 h_values = np.arange(h_min, h_max + step/2, step)
 
 # Параметры алгоритма
@@ -126,8 +144,10 @@ params_text = (f"$a_1={FIXED_PARAMS['a1']}, b_1={FIXED_PARAMS['b1']}, "
 plt.figtext(0.5, 0.01, params_text, ha='center', fontsize=10, bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.5))
 
 plt.tight_layout(rect=[0, 0.05, 1, 1])
-plt.savefig('T0_vs_h_nonlinear_recurrent.png', dpi=150)
-plt.savefig('T0_vs_h_nonlinear_recurrent.eps', format='eps')
+#plt.savefig('T0_vs_h_nonlinear_recurrent.png', dpi=150)
+#plt.savefig('T0_vs_h_nonlinear_recurrent.eps', format='eps')
+plt.savefig('T0_vs_h_linear_recurrent.png', dpi=150)
+plt.savefig('T0_vs_h_linear_recurrent.eps', format='eps')
 plt.show()
 
 # ----------------------------------------------------------------------
