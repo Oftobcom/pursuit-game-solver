@@ -24,21 +24,33 @@ except ImportError:
 # ----------------------------------------------------------------------
 # Фиксированные параметры (кроме h)
 # ----------------------------------------------------------------------
+#FIXED_PARAMS = {
+#    'a1': 0.10,
+#    'b1': 0.40,
+#    'a2': 0.05,
+#    'b2': 0.20,
+#    'alpha': 15.0,
+#    'beta': 8.0,
+#    'z01': 5.0,
+#    'z02': 100.0
+#}
+
 FIXED_PARAMS = {
-    'a1': 0.10,
-    'b1': 0.40,
-    'a2': 0.05,
-    'b2': 0.20,
-    'alpha': 15.0,
+    'a1': 0.5,
+    'b1': 0.2,
+    'a2': 0.4,
+    'b2': 0.15,
+    'alpha': 20.0,
     'beta': 8.0,
-    'z01': 5.0,
+    'z01': 0.0,
     'z02': 100.0
 }
 
+
 # Диапазон изменения h
-h_min = 1.0
+h_min = 0.5
 h_max = 5.0
-step = 1.0
+step = 0.5
 h_values = np.arange(h_min, h_max + step/2, step)
 
 # Параметры алгоритма
@@ -102,7 +114,7 @@ if np.any(mask_fail):
 
 plt.xlabel('Запаздывание $h$', fontsize=14)
 plt.ylabel('Минимальное время преследования $T_0$', fontsize=14)
-plt.title('Зависимость $T_0(h)$ (рекуррентный алгоритм, v02)', fontsize=16)
+plt.title('Зависимость $T_0(h)$ (рекуррентный алгоритм)', fontsize=16)
 plt.grid(True, linestyle='--', alpha=0.6)
 plt.legend(fontsize=12)
 
@@ -114,13 +126,14 @@ params_text = (f"$a_1={FIXED_PARAMS['a1']}, b_1={FIXED_PARAMS['b1']}, "
 plt.figtext(0.5, 0.01, params_text, ha='center', fontsize=10, bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.5))
 
 plt.tight_layout(rect=[0, 0.05, 1, 1])
-plt.savefig('T0_vs_h_recurrent_v02.png', dpi=150)
+plt.savefig('T0_vs_h_nonlinear_recurrent.png', dpi=150)
+plt.savefig('T0_vs_h_nonlinear_recurrent.eps', format='eps')
 plt.show()
 
 # ----------------------------------------------------------------------
 # Вывод таблицы результатов
 # ----------------------------------------------------------------------
-print("\nТаблица результатов (рекуррентный метод, v02):")
+print("\nТаблица результатов (рекуррентный метод):")
 print(" h       T0")
 print("--------------")
 for i, h in enumerate(results['h']):

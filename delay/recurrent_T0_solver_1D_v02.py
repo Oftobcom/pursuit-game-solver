@@ -387,6 +387,7 @@ if __name__ == "__main__":
 
     plt.tight_layout(rect=[0, 0.05, 1, 1])
     plt.savefig('T0_vs_h_recurrent_v02.png', dpi=150)
+    plt.savefig('T0_vs_h_recurrent_v02.eps', format='eps')
     plt.show()
 
     # ----------------------------------------------------------------------
