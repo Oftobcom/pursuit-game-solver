@@ -12,7 +12,7 @@ from typing import Optional
 # ----------------------------------------------------------------------
 # Рекуррентное вычисление φ(t) (лемма 5.1)
 # ----------------------------------------------------------------------
-def phi_recurrent_neutral(t, a, b, h):
+def phi_neutral_recurrent(t, a, b, h):
     """
     Вычисляет φ(t) рекуррентно по k и j.
     Использует соотношения:
@@ -58,7 +58,7 @@ def phi_recurrent_neutral(t, a, b, h):
 # Реализуем J_i рекуррентно по леммам 5.4 и 5.5.
 # ----------------------------------------------------------------------
 
-def J_i_recurrent_neutral(T, a, b, h):
+def J_i_recurrent(T, a, b, h):
     """
     Вычисляет J_i(T) рекуррентно, используя d_{k,j} и e_{n2,j}.
     """
@@ -121,12 +121,12 @@ def ell(T, h):
 # Вычисление Δ(T) и R(T) рекуррентно
 # ----------------------------------------------------------------------
 def Delta_recurrent(T, x0, y0, a1, b1, a2, b2, h):
-    phi1_T = phi_recurrent_neutral(T, a1, b1, h)
-    phi1_Th = phi_recurrent_neutral(T - h, a1, b1, h) if T >= h else 0.0
-    phi2_T = phi_recurrent_neutral(T, a2, b2, h)
-    phi2_Th = phi_recurrent_neutral(T - h, a2, b2, h) if T >= h else 0.0
-    J1 = J_i_recurrent_neutral(T, a1, b1, h)
-    J2 = J_i_recurrent_neutral(T, a2, b2, h)
+    phi1_T = phi_neutral_recurrent(T, a1, b1, h)
+    phi1_Th = phi_neutral_recurrent(T - h, a1, b1, h) if T >= h else 0.0
+    phi2_T = phi_neutral_recurrent(T, a2, b2, h)
+    phi2_Th = phi_neutral_recurrent(T - h, a2, b2, h) if T >= h else 0.0
+    J1 = J_i_recurrent(T, a1, b1, h)
+    J2 = J_i_recurrent(T, a2, b2, h)
     return (phi1_T - a1 * phi1_Th) * x0 - (phi2_T - a2 * phi2_Th) * y0 + b1 * x0 * J1 - b2 * y0 * J2
 
 def R_recurrent(T, alpha, beta, a1, b1, a2, b2, h):
@@ -137,8 +137,8 @@ def R_recurrent(T, alpha, beta, a1, b1, a2, b2, h):
     I1 = 0.0
     I2 = 0.0
     for m in range(n):
-        I1 += J_i_recurrent_neutral((m + 1) * h, a1, b1, h)
-        I2 += J_i_recurrent_neutral((m + 1) * h, a2, b2, h)
+        I1 += J_i_recurrent((m + 1) * h, a1, b1, h)
+        I2 += J_i_recurrent((m + 1) * h, a2, b2, h)
     # Остаток [n h, T] — интегрируем аналитически (полином)
     if T > n * h:
         # Интеграл от φ на [n h, T] можно вычислить по той же схеме, что и J_i, но с пределами n h и T.

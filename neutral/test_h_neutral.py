@@ -14,14 +14,21 @@ from recurrent_T0_solver_1D_neutral import find_T0_recurrent
 
 FIXED_PARAMS = {
     'a1': 0.02, 'b1': 0.005,
-    'a2': 0.01, 'b2': 0.002,
+    'a2': 0.1, 'b2': 0.002,
     'alpha': 0.22, 'beta': 0.08,
     'z01': 5.0, 'z02': 100.0
 }
 
-h_min = 20.0
-h_max = 60.0
-step = 2.0
+# FIXED_PARAMS = {
+#     'a1': 0.2, 'b1': 2,
+#     'a2': 0.5, 'b2': 2,
+#     'alpha': 30, 'beta': 20,
+#     'z01': 0, 'z02': 10
+# }
+
+h_min = 1
+h_max = 10
+step = 1
 h_values = np.arange(h_min, h_max + step/2, step)
 
 EPS = 1e-6
@@ -35,23 +42,23 @@ for h in h_values:
     params = FIXED_PARAMS.copy()
     params['h'] = h
 
-    # Базовый (численное интегрирование)
-    try:
-        T_basic = find_basic(
-            x0=params['z01'], y0=params['z02'],
-            alpha=params['alpha'], beta=params['beta'],
-            a1=params['a1'], b1=params['b1'],
-            a2=params['a2'], b2=params['b2'],
-            h=h, T_max=T_MAX, eps=EPS, verbose=False
-        )
-    except:
-        T_basic = None
+    # # Базовый (численное интегрирование)
+    # try:
+    #     T_basic = find_basic(
+    #         x0=params['z01'], y0=params['z02'],
+    #         alpha=params['alpha'], beta=params['beta'],
+    #         a1=params['a1'], b1=params['b1'],
+    #         a2=params['a2'], b2=params['b2'],
+    #         h=h, T_max=T_MAX, eps=EPS, verbose=False
+    #     )
+    # except:
+    #     T_basic = None
 
-    # Явный
-    try:
-        T_exp = find_T0_explicit(params, eps=EPS, nmax=NMAX)
-    except:
-        T_exp = None
+    # # Явный
+    # try:
+    #     T_exp = find_T0_explicit(params, eps=EPS, nmax=NMAX)
+    # except:
+    #     T_exp = None
 
     # Рекуррентный
     try:
@@ -60,17 +67,18 @@ for h in h_values:
         T_rec = None
 
     results['h'].append(h)
-    results['basic'].append(T_basic)
-    results['explicit'].append(T_exp)
+    # results['basic'].append(T_basic)
+    # results['explicit'].append(T_exp)
     results['recurrent'].append(T_rec)
 
 # Построение графиков
 plt.figure(figsize=(10,6))
 h_arr = np.array(results['h'])
 
-for method, label, color in [('basic', 'Basic (quad)', 'blue'),
-                             ('explicit', 'Explicit', 'green'),
-                             ('recurrent', 'Recurrent', 'red')]:
+# for method, label, color in [('basic', 'Basic (quad)', 'blue'),
+#                              ('explicit', 'Explicit', 'green'),
+#                              ('recurrent', 'Recurrent', 'red')]:
+for method, label, color in [('recurrent', 'Recurrent', 'red')]:
     vals = results[method]
     mask = [v is not None for v in vals]
     if any(mask):

@@ -9,6 +9,8 @@ import math
 import numpy as np
 from scipy.integrate import quad
 from typing import List, Optional
+import sys
+sys.stdout.reconfigure(encoding='utf-8')
 
 # Вспомогательные векторные операции
 def norm(vec: List[float]) -> float:

@@ -10,6 +10,8 @@ import math
 import numpy as np
 from scipy.integrate import quad
 from functools import lru_cache
+import sys
+# sys.stdout.reconfigure(encoding='utf-8')
 
 # ----------------------------------------------------------------------
 # Фундаментальное решение φ(t) для нейтрального уравнения
