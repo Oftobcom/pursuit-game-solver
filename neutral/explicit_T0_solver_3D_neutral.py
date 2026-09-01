@@ -26,7 +26,7 @@ def phi_neutral_explicit(t, a, b, h):
     total = 1.0
     for k in range(1, n + 1):
         tau = t - k * h
-        if tau == 0.0:
+        if abs(tau) < 1e-07:
             continue
         for j in range(1, k + 1):
             coeff = math.comb(k - 1, j - 1)

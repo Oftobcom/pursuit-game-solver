@@ -11,7 +11,7 @@ import numpy as np
 from scipy.integrate import quad
 from functools import lru_cache
 import sys
-# sys.stdout.reconfigure(encoding='utf-8')
+sys.stdout.reconfigure(encoding='utf-8')
 
 # ----------------------------------------------------------------------
 # Фундаментальное решение φ(t) для нейтрального уравнения
@@ -97,7 +97,7 @@ def R(T, alpha, beta, a1, b1, a2, b2, h):
 # ----------------------------------------------------------------------
 # Основной алгоритм поиска T0 (перебор + бисекция)
 # ----------------------------------------------------------------------
-def find_T0(x0, y0, alpha, beta, a1, b1, a2, b2, h,
+def find_T0_basic(x0, y0, alpha, beta, a1, b1, a2, b2, h,
             T_max=500.0, eps=1e-6, verbose=True):
     if abs(x0 - y0) < eps:
         if verbose:
@@ -157,7 +157,7 @@ if __name__ == "__main__":
         'alpha': 0.22, 'beta': 0.08,
         'z01': 5.0, 'z02': 100.0
     }
-    T0 = find_T0(
+    T0 = find_T0_basic(
         x0=params['z01'], y0=params['z02'],
         alpha=params['alpha'], beta=params['beta'],
         a1=params['a1'], b1=params['b1'],

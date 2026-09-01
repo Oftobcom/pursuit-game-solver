@@ -29,7 +29,7 @@ def phi_neutral_recurrent(t, a, b, h):
     # Для каждого k
     for k in range(1, n + 1):
         tau = t - k * h
-        if tau == 0.0:
+        if abs(tau) < 1e-07:
             continue
         if a > 0:
             # Начальное значение для j=1
@@ -41,7 +41,9 @@ def phi_neutral_recurrent(t, a, b, h):
                 total += c
         else:  # a == 0
             # только j = k
-            term = (b ** k) * (tau ** k) / math.factorial(k)
+            term = 1.0
+            for i in range(1, k+1):
+                term *= b * tau / i
             total += term
     return total
 
@@ -203,6 +205,8 @@ def find_T0_recurrent(params, eps=1e-6, nmax=1000):
             b = c
         else:
             a = c
+        print(c, delta_c, R_c)
+    print("=====")
     return (a + b) / 2.0
 
 # ----------------------------------------------------------------------
