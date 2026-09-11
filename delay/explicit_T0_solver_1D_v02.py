@@ -284,38 +284,73 @@ def plot_Delta_R(params, T_max=None, n_points=500, T0=None, save_path=None):
 # Пример использования (параметры из статьи)
 # ------------------------------------------------------------
 if __name__ == "__main__":
-    # Параметры из раздела "Примеры вычисления"
-    # parameters = {
-    #     'a1': 0.0015, 'b1': 0.005,
-    #     'a2': 0.0008, 'b2': 0.002,
-    #     'h': 24.0,
-    #     'alpha': 0.22, 'beta': 0.08,
-    #     'z01': 5.0, 'z02': 100.0
-    # }
 
+    # #########
+    # # Параметры, показывающие практические линейную зависимость T0 от h.
+    # # начало
     # parameters = {
-    #     'a1': 0.10,
-    #     'b1': 0.40,
-    #     'a2': 0.05,
-    #     'b2': 0.20,
-    #     'h': 5,
-    #     'alpha': 15.0,
-    #     'beta': 8.0,
+    #     'a1': 0.0015,
+    #     'b1': 0.005,
+    #     'a2': 0.0008,
+    #     'b2': 0.002,
+    #     'h': 20.0,
+    #     'alpha': 0.22,
+    #     'beta': 0.08,
     #     'z01': 5.0,
     #     'z02': 100.0
     # }
 
+    # h_min = 20
+    # h_max = 60
+    # h = h_min
+    # step = 2
+    # # конец
+    # #########
+
+    # #########
+    # # Параметры, показывающие нелинейную зависимость T0 от h.
+    # # начало
+    # parameters = {
+    #     'a1': 0.5,
+    #     'b1': 0.2,
+    #     'a2': 0.4,
+    #     'b2': 0.15,
+    #     'h': 0.5,
+    #     'alpha': 20,
+    #     'beta': 8,
+    #     'z01': 0.0,
+    #     'z02': 100.0
+    # }
+
+    # h_min = 0.5
+    # h_max = 5
+    # h = h_min
+    # step = 0.5
+    # # конец
+    # #########
+
+
+    #########
+    # Параметры, показывающие нелинейную зависимость T0 от h.
+    # начало
     parameters = {
-        'a1': 0.0015,
-        'b1': 0.005,
-        'a2': 0.0008,
-        'b2': 0.002,
-        'h': 24.0,
-        'alpha': 0.22,
-        'beta': 0.08,
-        'z01': 5.0,
+        'a1': 0.25,
+        'b1': 0.1,
+        'a2': 0.2,
+        'b2': 0.075,
+        'h': 0.5,
+        'alpha': 20,
+        'beta': 8,
+        'z01': 0.0,
         'z02': 100.0
     }
+
+    h_min = 0.5
+    h_max = 5
+    h = h_min
+    step = 0.5
+    # конец
+    #########
 
     results = {
         'h': [],
@@ -323,9 +358,7 @@ if __name__ == "__main__":
         'success': []
     }
 
-    h = 20
-    step = 2
-    for i in range(1, 22):
+    while h <= h_max:
         parameters['h'] = h  # можно менять для тестирования разных h
         T0 = find_T0(parameters, eps=1e-6, nmax=500)
         if T0 is not None:
@@ -349,7 +382,7 @@ if __name__ == "__main__":
     if np.any(mask_success):
         h_success = h_arr[mask_success]
         T_success = np.array([results['T0'][i] for i in range(len(h_arr)) if mask_success[i]])
-        plt.plot(h_success, T_success, 'o-', label='Рекуррентный метод', color='red', linewidth=2, markersize=8)
+        plt.plot(h_success, T_success, 'o-', label='Явный метод', color='red', linewidth=2, markersize=8)
 
         # Подписи значений у точек
         for hi, ti in zip(h_success, T_success):
@@ -368,7 +401,7 @@ if __name__ == "__main__":
 
     plt.xlabel('Запаздывание $h$', fontsize=14)
     plt.ylabel('Минимальное время преследования $T_0$', fontsize=14)
-    plt.title('Зависимость $T_0(h)$ (рекуррентный алгоритм, v02)', fontsize=16)
+    plt.title('Зависимость $T_0(h)$', fontsize=16)
     plt.grid(True, linestyle='--', alpha=0.6)
     plt.legend(fontsize=12)
 
@@ -380,13 +413,14 @@ if __name__ == "__main__":
     plt.figtext(0.5, 0.01, params_text, ha='center', fontsize=10, bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.5))
 
     plt.tight_layout(rect=[0, 0.05, 1, 1])
-    plt.savefig('T0_vs_h_recurrent_v02.png', dpi=150)
+    plt.savefig('T0_vs_h_explicit_v02.png', dpi=150)
+    plt.savefig('T0_vs_h_explicit_v02.eps', format='eps')
     plt.show()
 
     # ----------------------------------------------------------------------
     # Вывод таблицы результатов
     # ----------------------------------------------------------------------
-    print("\nТаблица результатов (рекуррентный метод, v02):")
+    print("\nТаблица результатов (явный метод):")
     print(" h       T0")
     print("--------------")
     for i, h in enumerate(results['h']):
